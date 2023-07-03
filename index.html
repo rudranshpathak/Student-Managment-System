@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Management System</title>
+  <style>
+    /* CSS styles for the student management system */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    th {
+      background-color: #f2f2f2;
+      text-align: left;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    .search-box {
+      margin-bottom: 10px;
+    }
+
+    .search-box input[type="text"] {
+      width: 200px;
+      padding: 5px;
+    }
+
+    .search-box button {
+      padding: 5px 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Student Management System</h1>
+
+  <form id="student-form">
+    <h2>Add Student</h2>
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+    <label for="age">Age:</label>
+    <input type="number" id="age" required>
+    <label for="grade">Grade:</label>
+    <input type="text" id="grade" required>
+    <label for="degree">Degree:</label>
+    <input type="text" id="degree" required>
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+    <button type="submit" id="add-student-btn">Add Student</button>
+  </form>
+
+  <div class="search-box">
+    <input type="text" id="search-input" placeholder="Search by name, email, or degree">
+    <button type="button" id="search-btn">Search</button>
+  </div>
+
+  <table id="student-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Grade</th>
+        <th>Degree</th>
+        <th>Email</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // JavaScript code for the student management system
+
+    // Array of students
+    const students = [
+      { ID: 1, name: 'Alice', age: 21, grade: 'A', degree: 'Btech', email: 'alice@example.com' },
+      { ID: 2, name: 'Bob', age: 22, grade: 'B', degree: 'MBA', email: 'bob@example.com' },
+      { ID: 3, name: 'Charlie', age: 20, grade: 'C', degree:'Arts', email: 'charlie@example.com' }
+    ];
+
+    // Function to initialize the student table
+    function initStudentTable() {
+      const tableBody = document.querySelector('#student-table tbody');
+      tableBody.innerHTML = '';
+
+      students.forEach(student => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${student.ID}</td>
+          <td>${student.name}</td>
+          <td>${student.age}</td>
+          <td>${student.grade}</td>
+          <td>${student.degree}</td>
+          <td>${student.email}</td>
+          <td>
+            <button class="edit-btn" data-id="${student.ID}">Edit</button>
+            <button class="delete-btn" data-id="${student.ID}">Delete</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Render the student table
+    initStudentTable();
+
+    // Function to add a new student
+    function addStudent(event) {
+      event.preventDefault();
+
+      const name = document.querySelector('#name').value;
+      const age = document.querySelector('#age').value;
+      const grade = document.querySelector('#grade').value;
+      const degree = document.querySelector('#degree').value;
+      const email = document.querySelector('#email').value;
+
+      const newStudent = {
+        ID: students.length + 1,
+        name,
+        age,
+        grade,
+        degree,
+        email
+      };
+
+      students.push(newStudent);
+
+      initStudentTable();
+      resetForm();
+    }
+
+    // Function to reset the form inputs
+    function resetForm() {
+      document.querySelector('#name').value = '';
+      document.querySelector('#age').value = '';
+      document.querySelector('#grade').value = '';
+      document.querySelector('#degree').value = '';
+      document.querySelector('#email').value = '';
+
+      const addStudentBtn = document.querySelector('#add-student-btn');
+      addStudentBtn.innerHTML = 'Add Student';
+      addStudentBtn.removeEventListener('click', editStudent);
+
+      const studentForm = document.querySelector('#student-form');
+      studentForm.removeEventListener('submit', editStudent);
+      studentForm.addEventListener('submit', addStudent);
+    }
+
+    // Function to edit a student
+    function editStudent(event) {
+      event.preventDefault();
+
+      const id = document.querySelector('#student-form').getAttribute('data-id');
+      const name = document.querySelector('#name').value;
+      const age = document.querySelector('#age').value;
+      const grade = document.querySelector('#grade').value;
+      const degree = document.querySelector('#degree').value;
+      const email = document.querySelector('#email').value;
+
+      const student = students.find(s => s.ID === parseInt(id));
+      if (student) {
+        student.name = name;
+        student.age = age;
+        student.grade = grade;
+        student.degree = degree;
+        student.email = email;
+      }
+
+      initStudentTable();
+      resetForm();
+    }
+
+    // Function to handle the edit button click
+    function handleEditClick(event) {
+      const id = event.target.getAttribute('data-id');
+      const student = students.find(s => s.ID === parseInt(id));
+
+      if (student) {
+        document.querySelector('#name').value = student.name;
+        document.querySelector('#age').value = student.age;
+        document.querySelector('#grade').value = student.grade;
+        document.querySelector('#degree').value = student.degree;
+        document.querySelector('#email').value = student.email;
+
+        const addStudentBtn = document.querySelector('#add-student-btn');
+        addStudentBtn.innerHTML = 'Edit Student';
+        addStudentBtn.addEventListener('click', editStudent);
+
+        const studentForm = document.querySelector('#student-form');
+        studentForm.removeEventListener('submit', addStudent);
+        studentForm.addEventListener('submit', editStudent);
+        studentForm.setAttribute('data-id', student.ID);
+      }
+    }
+
+    // Function to handle the delete button click
+    function handleDeleteClick(event) {
+      const id = event.target.getAttribute('data-id');
+      const index = students.findIndex(s => s.ID === parseInt(id));
+
+      if (index !== -1) {
+        students.splice(index, 1);
+        initStudentTable();
+      }
+    }
+
+    // Add event listeners for edit and delete buttons
+    const editButtons = document.querySelectorAll('.edit-btn');
+    editButtons.forEach(button => {
+      button.addEventListener('click', handleEditClick);
+    });
+
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', handleDeleteClick);
+    });
+
+    // Function to filter students based on search criteria
+    function searchStudents() {
+      const searchInput = document.querySelector('#search-input').value.toLowerCase();
+
+      const filteredStudents = students.filter(student =>
+        student.name.toLowerCase().includes(searchInput) ||
+        student.email.toLowerCase().includes(searchInput) ||
+        student.degree.toLowerCase().includes(searchInput)
+      );
+
+      renderFilteredStudents(filteredStudents);
+    }
+
+    // Function to render filtered students in the table
+    function renderFilteredStudents(filteredStudents) {
+      const tableBody = document.querySelector('#student-table tbody');
+      tableBody.innerHTML = '';
+
+      filteredStudents.forEach(student => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${student.ID}</td>
+          <td>${student.name}</td>
+          <td>${student.age}</td>
+          <td>${student.grade}</td>
+          <td>${student.degree}</td>
+          <td>${student.email}</td>
+          <td>
+            <button class="edit-btn" data-id="${student.ID}">Edit</button>
+            <button class="delete-btn" data-id="${student.ID}">Delete</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      // Add event listeners for edit and delete buttons
+      const editButtons = document.querySelectorAll('.edit-btn');
+      editButtons.forEach(button => {
+        button.addEventListener('click', handleEditClick);
+      });
+
+      const deleteButtons = document.querySelectorAll('.delete-btn');
+      deleteButtons.forEach(button => {
+        button.addEventListener('click', handleDeleteClick);
+      });
+    }
+
+    // Add event listener for search button
+    const searchBtn = document.querySelector('#search-btn');
+    searchBtn.addEventListener('click', searchStudents);
+  </script>
+</body>
+</html>
+
